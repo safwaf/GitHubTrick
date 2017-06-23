@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="320" height="672"
+style="border:1px solid #000000;">
+</canvas>
+
+<script>
+//graphics stuff to let us draw to the canvas. Don't touch
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+ctx.strokeStyle = "#000000";
+window.addEventListener("keypress", function (event) {
+  if (event.defaultPrevented) {
+    return; // Do nothing if the event was already processed
+  }
+
+  switch (event.keyCode) {
+    case 97:
+      pressA();
+      break;
+    case 100:
+      pressD();
+      break;
+    case 115:
+      pressS();
+      break;
+    case 113:
+      pressQ();
+      break;
+    case 101:
+      pressE();
+      break;
+      case 32:
+      pressSpace();
+      break;
+    default:
+      return; // Quit when this doesn't handle the key event.
+  }
+
+drawAll();
+
+  // Cancel the default action to avoid it being handled twice
+  event.preventDefault();
+}, true);
+
+
+
+//board variables
+var board = new Array();
+for (x=0;x<10;x++)
+{
+board[x] = new Array();
+for (y=0;y<20;y++)
+{
+board[x][y]=false;
+}
+}
+
+var score = 0;
+var speed = 10;
+var speedIncTimer = 0;
+
+//the board stores coordinates in terms of tiles. These must be multiplied by 32 to get the absolute coordinates for 
+
+//are we waiting to play, or playing?
+var waiting = true;
+
+//x and y coordinates of the current piece
+var cpx = 0;
+var cpy = 0;
+
+//The shape of the current piece, represented as a 4*4 array
+var cpshape = new Array();
+for (x=0;x<4;x++)
+{
+cpshape[x] = new Array();
+for (y=0;y<4;y++)
+{
+cpshape[x][y]=false;
+}
+}
+
+//set up the game canvas and display the start game screen
+ctx.fillStyle = "#AA55AA";
+ctx.fillRect(0,640,320,32);
+ctx.fillStyle = "#DDDDFF";
+ctx.fillRect(0,0,320,640);
+ctx.fillStyle = "#000000";
+ctx.font = "30px Arial";
+ctx.fillText("Anti-Tetris", 32,670)
+ctx.fillText("Anti-Tetris", 32,320);
+ctx.fillText("QEASD to play", 32,352);
+ctx.fillText("SPACEBAR to start", 32,384);
+
+
+function startGame()
+{
+//reset the board
+for (x=0;x<10;x++)
+{
+for (y=0;y<20;y++)
+{
+board[x][y]=false;
+}
+}
+
+//reset the score
+score = 0;
+
+//start the game timer
+setInterval(tick, 1000);
+
+//setup a new block
+newBlock();
+//draw everything
+drawAll();
+}
+
+//Drawing functions
+
+function drawAll()
+{
+//refresh the drawing plane
+ctx.fillStyle = "#DDDDFF";
+ctx.fillRect(0,0,320,640);
+
+drawBoard();
+drawPiece();
+drawScore();
+}
+
+function drawBoard()
+{
+ctx.fillStyle = "#996644";
+for (x=0;x<10;x++)
+{
+for (y=0;y<20;y++)
+{
+if (board[x][y]==true)
+{
+ctx.fillRect(x*32,y*32,32,32);
+ctx.strokeRect(x*32,y*32,32,32);
+}
+}
+}
+}
+
+function drawPiece()
+{
+ctx.fillStyle = "#FFCC88";
+for (x=0;x<4;x++)
+{
+for (y=0;y<4;y++)
+{
+if (cpshape[x][y]==true)
+{
+ctx.fillRect((cpx+x)*32,(cpy+y)*32,32,32);
+ctx.strokeRect((cpx+x)*32,(cpy+y)*32,32,32);
+}
+}
+}
+}
+
+function drawScore()
+{
+//flush the old text
+ctx.fillStyle = "#AA55AA";
+ctx.fillRect(180,640,140,32);
+
+ctx.fillStyle = "#000000";
+ctx.fillText("Score:",180,670);
+ctx.fillText(score,265,670);
+
+}
+
+
+//Input functions
+
+function pressA()
+{
+if (canMoveLeft()) {
+cpx -= 1;
+}
+}
+
+function pressD()
+{
+if (canMoveRight()) {
+cpx += 1;
+}
+
+}
+
+function pressS()
+{
+if (canMoveDown()==true)
+{
+cpy +=1
+}
+else
+{
+placePiece();
+newBlock();
+score+=4;
+}
+}
+
+function pressQ()
+{
+rotateBlockLeft();
+}
+
+function pressE()
+{
+rotateBlockRight();
+}
+
+function pressSpace()
+{
+if (waiting == true)
+{
+waiting = false;
+startGame();
+}
+}
+
+//Game functions
+
+function tick()
+{
+//inrement speed or speedIncTimer to maintain difficulty
+if (speedIncTimer == 100)
+{
+speedIncTimer = 0;
+speed += 1;
+setInterval(tick, 10000/speed);
+}
+else {
+speedIncTimer += 1;
+}
+
+if (canMoveDown()==true)
+{
+cpy +=1
+}
+else
+{
+placePiece();
+newBlock();
+score+=4;
+}
+
+
+
+//lastly, redraw the board
+drawAll();
+}
+
+function newBlock()
+{
+clearBlock();
+switch (Math.floor(Math.random() * 7))
+{
+case 0:
+//line block
+cpshape[0][0]=true;
+cpshape[1][0]=true;
+cpshape[2][0]=true;
+cpshape[3][0]=true;
+break;
+case 1:
+//square block
+cpshape[0][0]=true;
+cpshape[1][0]=true;
+cpshape[0][1]=true;
+cpshape[1][1]=true;
+break;
+
+case 2:
+//"z" block
+cpshape[0][0]=true;
+cpshape[1][0]=true;
+cpshape[1][1]=true;
+cpshape[2][1]=true;
+break;
+
+case 3:
+//"s" block
+cpshape[1][0]=true;
+cpshape[1][1]=true;
+cpshape[0][1]=true;
+cpshape[2][0]=true;
+break;
+
+case 4:
+//"t" block
+cpshape[0][0]=true;
+cpshape[1][0]=true;
+cpshape[2][0]=true;
+cpshape[1][1]=true;
+break;
+
+case 5:
+//left "l" block
+cpshape[0][0]=true;
+cpshape[1][0]=true;
+cpshape[2][0]=true;
+cpshape[2][1]=true;
+break;
+
+case 6:
+//right "l" block
+cpshape[0][0]=true;
+cpshape[1][0]=true;
+cpshape[2][0]=true;
+cpshape[0][1]=true;
+break;
+}
+
+//apply a random rotation to the block
+for (i = Math.floor(Math.random() * 4);i<3;i++)
+{
+rotateBlockRight();
+}
+
+//move the block back to the top of the board
+cpy=0;
+cpx=5;
+}
+
+function rotateBlockLeft()
+{
+//set up a holding place for the old array
+var old = new Array();
+for (x=0;x<4;x++)
+{
+old[x] = new Array();
+for (y=0;y<4;y++)
+{
+old[x][y]=cpshape[x][y];
+}
+}
+
+for (x=0;x<4;x++)
+{
+for (y=0;y<4;y++)
+{
+cpshape[x][y]=old[3-y][x];
+}
+}
+alignBlock();
+}
+
+function rotateBlockRight()
+{
+//set up a holding place for the old array
+var old = new Array();
+for (x=0;x<4;x++)
+{
+old[x] = new Array();
+for (y=0;y<4;y++)
+{
+old[x][y]=cpshape[x][y];
+}
+}
+
+for (x=0;x<4;x++)
+{
+for (y=0;y<4;y++)
+{
+cpshape[x][y]=old[y][3-x];
+}
+}
+alignBlock();
+}
+
+function alignBlock()
+{
+//this function justifies the block to the left and to the top of the cpshape box
+leftJustify();
+topJustify();
+}
+
+function leftJustify()
+{
+if (isLeftJustified() == false)
+{
+do
+{
+for (x=0;x<3;x++)
+{
+for (y=0;y<4;y++)
+{
+cpshape[x][y]=cpshape[x+1][y];
+}
+}
+for (y=0;y<4;y++)
+{
+cpshape[3][y]=false;
+}
+}
+while (!isLeftJustified());
+
+}
+}
+
+function topJustify()
+{
+if (isTopJustified() == false)
+{
+do
+{
+for (x=0;x<4;x++)
+{
+for (y=0;y<3;y++)
+{
+cpshape[x][y]=cpshape[x][y+1];
+}
+}
+for (x=0;x<4;x++)
+{
+cpshape[x][3]=false;
+}
+}
+while (!isTopJustified());
+
+}
+}
+
+function isLeftJustified()
+{
+for (y=0;y<4;y++)
+{
+if (cpshape[0][y]==true)
+{
+return true;
+}
+}
+return false;
+}
+
+function isTopJustified()
+{
+for (x=0;x<4;x++)
+{
+if (cpshape[x][0]==true)
+{
+return true;
+}
+}
+return false;
+}
+
+
+function getBlockWidth()
+{
+for (x=3;x>=0;x--)
+{
+for (y=0;y<4;y++)
+{
+if (cpshape[x][y]==true)
+{
+return x+1;
+}
+}
+}
+}
+
+function clearBlock()
+{
+for (x=0;x<4;x++)
+{
+for (y=0;y<4;y++)
+{
+cpshape[x][y]=false;
+}
+}
+}
+
+function canMoveDown()
+{
+for (x=0;x<4;x++)
+{
+for (y=0;y<4;y++)
+{
+if (cpshape[x][y] == true)
+{
+if((cpy+y==19)||(board[cpx+x][cpy+y+1]==true)) 
+{
+return false;
+}
+}
+}
+}
+return true;
+}
+
+function canMoveRight()
+{
+for (x=0;x<4;x++)
+{
+for (y=0;y<4;y++)
+{
+if (cpshape[x][y] == true)
+{
+if((cpx+x==9)||(board[cpx+x+1][cpy+y]==true)) 
+{
+return false;
+}
+}
+}
+}
+return true;
+}
+
+function canMoveLeft()
+{
+for (x=0;x<4;x++)
+{
+for (y=0;y<4;y++)
+{
+if (cpshape[x][y] == true)
+{
+if((cpx+x==0)||(board[cpx+x-1][cpy+y]==true)) 
+{
+return false;
+}
+}
+}
+}
+return true;
+}
+
+function placePiece()
+{
+for (x=0;x<4;x++)
+{
+for (y=0;y<4;y++)
+{
+if (cpshape[x][y]==true)
+{
+board[cpx+x][cpy+y]=true;
+}
+}
+}
+}
+
+function loseGame()
+{
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+Website research:
+
+domain name registration
+data hosting
+bandwidth 
+professional design
+design software (dreamweaver etc)
+advertising (google adsense or alternatives)
+domain email addresses (e.g. tyson@ourdomain.com)
+server restrictions (can we run a server for games and other projects off of that same domain?)
+
+budget proposal/discussion
+
+Corporate/bookkeeping:
+Choose a (preferably free) software for our bookkeeping (Agiloft, QuickBooks, etc)
+research into pricing (How much would we charge for various amounts of service)
+-hourly rate
+-licensing
+-completed software
+register paypal or some other form of online payment
+research alternative funding (Patreon, kickstarter, gofundme, etc)
+research competition(is anyone else doing this? what is their model?)
+
+schedule determination
+weekly hours
+
+company registration/business license
+name 
+motto
+logo
+
+Software:
+develop a simple learning project for Kayla (if desired)
+
+testing:
+setup youtube channel/testing platform
+antitetris
+
+starter projects:
+games:
+antitetris/tetris suite - HTML5/javascript
+grisk(risk on a simple grid) - HTML5/javascript
+Duneonerator(ongoing) - C#
+Minimalist RPG - undecided
+idle game - undecided
+nontransitive dice game (may be more appropriate as demo) - undecided
+LightsOut - undecided (probably HTML5/javascript)
+
+game pieces / demos:
+starburst explosion generator - HTML5/javascript
+name generator - C#
+prodedural tiling algorithm - C#
