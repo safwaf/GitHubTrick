@@ -61,6 +61,9 @@ board[x][y]=false;
 var score = 0;
 var speed = 10;
 var speedIncTimer = 0;
+var ticker=0;
+
+var interval;
 
 //the board stores coordinates in terms of tiles. These must be multiplied by 32 to get the absolute coordinates for 
 
@@ -89,7 +92,7 @@ ctx.fillStyle = "#DDDDFF";
 ctx.fillRect(0,0,320,640);
 ctx.fillStyle = "#000000";
 ctx.font = "30px Arial";
-ctx.fillText("Anti-Tetris", 32,670)
+ctx.fillText("Anti-Tetris", 0,670)
 ctx.fillText("Anti-Tetris", 32,320);
 ctx.fillText("QEASD to play", 32,352);
 ctx.fillText("SPACEBAR to start", 32,384);
@@ -108,14 +111,21 @@ board[x][y]=false;
 
 //reset the score
 score = 0;
+speed = 10;
+speedIncTimer = 0;
+ticker = 0;
+
 
 //start the game timer
-setInterval(tick, 1000);
+interval = setInterval(tick, 1000);
 
 //setup a new block
 newBlock();
 //draw everything
 drawAll();
+
+//stop waiting
+waiting = false;
 }
 
 //Drawing functions
@@ -170,8 +180,8 @@ ctx.fillStyle = "#AA55AA";
 ctx.fillRect(180,640,140,32);
 
 ctx.fillStyle = "#000000";
-ctx.fillText("Score:",180,670);
-ctx.fillText(score,265,670);
+ctx.fillText("Score:",150,670);
+ctx.fillText(score,235,670);
 
 }
 
@@ -180,20 +190,27 @@ ctx.fillText(score,265,670);
 
 function pressA()
 {
+if (!waiting)
+{
 if (canMoveLeft()) {
 cpx -= 1;
+}
 }
 }
 
 function pressD()
 {
+if (!waiting)
+{
 if (canMoveRight()) {
 cpx += 1;
 }
-
+}
 }
 
 function pressS()
+{
+if (!waiting)
 {
 if (canMoveDown()==true)
 {
@@ -204,17 +221,33 @@ else
 placePiece();
 newBlock();
 score+=4;
+ticker+=4;
+}
 }
 }
 
 function pressQ()
 {
+if (!waiting)
+{
 rotateBlockLeft();
+if (!checkPiece())
+{
+rotateBlockRight();
+}
+}
 }
 
 function pressE()
 {
+if (!waiting)
+{
 rotateBlockRight();
+if (!checkPiece())
+{
+rotateBlockLeft();
+}
+}
 }
 
 function pressSpace()
@@ -230,12 +263,15 @@ startGame();
 
 function tick()
 {
+if (!waiting)
+{
 //inrement speed or speedIncTimer to maintain difficulty
 if (speedIncTimer == 100)
 {
 speedIncTimer = 0;
 speed += 1;
-setInterval(tick, 10000/speed);
+clearInterval(interval);
+interval = setInterval(tick, 10000/speed);
 }
 else {
 speedIncTimer += 1;
@@ -250,12 +286,30 @@ else
 placePiece();
 newBlock();
 score+=4;
+ticker+=4;
+
+//are we moving the board up?
+if (ticker > 40)
+{
+shiftBoardDown();
+ticker -= 9;
 }
-
-
+}
 
 //lastly, redraw the board
 drawAll();
+
+//check for lose conditions
+if(checkLines())
+{
+loseGame();
+}
+
+if (!checkPiece())
+{
+loseGame();
+}
+}
 }
 
 function newBlock()
@@ -549,7 +603,71 @@ board[cpx+x][cpy+y]=true;
 
 function loseGame()
 {
+waiting = true;
+clearInterval(interval);
+drawAll();
+ctx.fillStyle = "#000000";
+ctx.fillText("YOU LOSE",64,320);
+}
 
+function checkPiece()
+{
+//this function checks if the piece can be where it currently is. used in rotation checking
+for (x=0;x<4;x++)
+{
+for (y=0;y<4;y++)
+{
+if (cpshape[x][y]==true)
+{
+if(cpx+x>9 || board[cpx+x][cpy+y]==true)
+{
+return false;
+}
+}
+}
+}
+return true;
+}
+
+function checkLines()
+{
+for (y=0;y<20;y++)
+{
+if (checkThisLine(y) == true)
+{
+return true;
+}
+}
+return false;
+}
+
+function checkThisLine(y)
+{
+for (x=0;x<10;x++)
+{
+if (board[x][y]==false)
+{
+return false;
+}
+}
+return true;
+}
+
+function shiftBoardDown()
+{
+//this function shifts the board down one tile
+//this allows the game to continue indefinitely
+for (x=0;x<10;x++)
+{
+for (y=19;y>0;y--)
+{
+board[x][y]=board[x][y-1];
+}
+}
+for (x=0;x<10;x++)
+{
+board[x][0]=false;
+}
 }
 
 </script>
