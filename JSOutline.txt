@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="320" height="672"
+style="border:1px solid #000000;">
+</canvas>
+
+<script>
+//graphics stuff to let us draw to the canvas. Don't touch
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+
+
+
+</script>
+</body>
+</html>

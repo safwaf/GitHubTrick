@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="420" height="420"
+style="border:5px solid #000000;" onclick="processClick(event)">
+</canvas>
+
+<script>
+//graphics stuff to let us draw to the canvas. Don't touch
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+//x and y coordinates of the canvas, for click handling
+var canvasX=c.getBoundingClientRect().left;
+var canvasY=c.getBoundingClientRect().top;
+
+//variables for determining the size of the board
+var size=5;	//size of the board, in squares. between 
+var players=4;	//number of players in the game. between 2 and 8
+
+//the board is stored in two arrays. one represents ownership and the other represents number of armies
+
+//ownership array. 0 is unowned. 1 is always the human player. every other player is AI
+var boardP = new Array();
+for (x=0;x<size;x++)
+{
+boardP[x] = new Array();
+for (y=0;y<size;y++)
+{
+//default the board to unowned
+boardP[x][y]=1;
+}
+}
+
+//armies array. by default every square has one army in it (a square can never contain 0 armies)
+var boardA = new Array();
+for (x=0;x<size;x++)
+{
+boardA[x] = new Array();
+for (y=0;y<size;y++)
+{
+//default the board to one army
+boardA[x][y]=1;
+}
+}
+
+//control variables. These are used to keep track of what phase of play we are in
+var isPlayerTurn=true;	//is it the player's turn?
+var isSelected=true;	//has the player selected a tile?
+
+//coordinates of the selected tile
+var selectX=3;
+var selectY=4;
+
+
+
+function newGame()	//a new game with a given size and number of players
+{
+size = document.getElementById("bSize");
+players = document.getElementById("pNum");
+c.width=50;
+c.height=100;
+//drawAll();
+}
+
+
+function processClick(event)	//this function runs whenever the user clicks on the canvas
+{
+//the actual mouse coordinates relative to the canvas
+var mouseX=event.clientX-canvasX;
+var mouseY=event.clientY-canvasY;
+
+//the array coordinates of the specific square we clicked on 
+var squareX=Math.floor(mouseX/50);
+var squareY=Math.floor(mouseY/50);
+
+
+if(isSelected)	//we have a tile currently selected
+{
+if (selectX==squareX&&selectY==squareY)
+{
+isSelected=false;
+}
+else
+{
+//this would be the code for attacking an enemy
+}
+}
+else	//we do not currently have a tile selected
+{
+if (boardP[squareX][squareY]==1)	//is it a tile that belongs to us?
+{
+isSelected=true;
+selectX=squareX;
+selectY=squareY;
+}
+}
+//just used for testing
+//drawAll();
+}
+
+
+function drawAll()
+{
+//clear everything
+ctx.clearRect(0,0,size*50,size*50);
+//draw the board
+drawBoard();
+//if there is a selected tile, draw a border around it
+if (isSelected)
+{
+ctx.strokeStyle="#00FF88";
+ctx.strokeRect(50*selectX,50*selectY,50,50);
+}
+}
+
+function drawBoard()
+{
+for (x=0;x<size;x++)
+{
+for (y=0;y<size;y++)
+{
+drawSquare(x,y);
+}
+}
+}
+
+function drawSquare(x,y)	//draws a square belonging to player p with n armies at x,y)
+{
+var color;
+switch (boardP[x][y])
+{
+case 0:
+color="#888888";	//Grey
+break;
+case 1:
+color="#FF00FF";	//Purple, for tradition
+break;
+case 2:
+color="#FF0000";	//Red
+break;
+case 3:
+color="#FFFF00";	//Yellow
+break;
+case 4:
+color="#00FF00";	//Green
+break;
+case 5:
+color="#00FFFF";	//Cyan
+break;
+case 6:
+color="#0000FF";	//Blue
+break;
+case 7:
+color="#FF8800";	//Orange
+break;
+case 8:
+color="#FFFFFF";	//White
+break;
+}
+ctx.fillStyle=color;
+ctx.fillRect((50*x)+1,(50*y)+1,48,48);
+ctx.fillStyle="#000000";
+ctx.font="30px Arial";
+ctx.fillText(boardA[x][y],(50*x)+10,(50*y)+35);
+}
+
+
+function assignPlayers()
+{
+
+}
+
+function randomArray(n)	//creates a random ordering of the numbers from 1 to n
+{
+
+}
+
+function newBoardArrays()	//sets up new board arrays. called from newgame after changing the size and number of players
+{
+boardA = new Array();
+for (x=0;x<size;x++)
+{
+boardA[x] = new Array();
+for (y=0;y<size;y++)
+{
+//default the board to one army
+boardA[x][y]=1;
+}
+}
+
+boardP = new Array();
+for (x=0;x<size;x++)
+{
+boardP[x] = new Array();
+for (y=0;y<size;y++)
+{
+//default the board to unowned
+boardP[x][y]=1;
+}
+}
+}
+
+</script>
+
+<form>
+Number of Players: 2<input type="radio" name="pNum" value=2>4<input type="radio" name="pNum" value=4>8<input type="radio" name="pNum" value=8><br>
+Size of the Board: 3<input type="radio" name="bSize" value=3>4<input type="radio" name="bSize" value=4>5<input type="radio" name="bSize" value=5>6<input type="radio" name="bSize" value=6>7<input type="radio" name="bSize" value=7>8<input type="radio" name="bSize" value=8>9<input type="radio" name="bSize" value=9>10<input type="radio" name="bSize" value=10><br>
+</form>
+<button onclick="newGame()">New Game</button>
+</body>
+</html>
