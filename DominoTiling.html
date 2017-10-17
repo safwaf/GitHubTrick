@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="myCanvas" width="300" height="300"
+style="border:1px solid #000000;">
+</canvas>
+
+<script>
+//graphics stuff to let us draw to the canvas. Don't touch
+var c = document.getElementById("myCanvas");
+var ctx = c.getContext("2d");
+
+var floorWidth = 30;
+var floorHeight = 30;
+
+var floorArray = new Array();
+for (x=0;x<floorWidth;x++)
+{
+floorArray[x] = new Array();
+for (y=0;y<floorHeight+1;y++)
+{
+floorArray[x][y]=false;
+}
+}
+
+function TileFloor()
+{
+for (y=0;y<floorHeight;y++)
+{
+for (x=0;x<floorWidth;x++)
+{
+if (floorArray[x][y]==false)
+{
+PlaceTile(x,y);
+}
+}
+}
+}
+
+function PlaceTile(x,y)
+{
+//get a random color
+//ctx.fillStyle='#'+Math.floor(Math.random()*16777215).toString(16);
+ctx.fillStyle='#'+Math.floor(10+Math.random()*90)+Math.floor(10+Math.random()*90)+Math.floor(10+Math.random()*90);
+
+if (Math.random()<0.5)
+{
+//try to place tile horizontally
+if (x<28 && floorArray[x+1][y]==false)
+{
+//horizontal tile
+floorArray[x][y] = true;
+floorArray[x+1][y] = true;
+ctx.fillRect(10*x,10*y,20,10);
+}
+else 
+{
+//vertical tile
+floorArray[x][y] = true;
+floorArray[x][y+1] = true;
+ctx.fillRect(10*x,10*y,10,20);
+}
+
+}
+else
+{
+//vertical tile
+floorArray[x][y] = true;
+floorArray[x][y+1] = true;
+ctx.fillRect(10*x,10*y,10,20);
+}
+}
+
+TileFloor();
+
+</script>
+</body>
+</html>
